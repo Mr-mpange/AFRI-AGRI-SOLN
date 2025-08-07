@@ -54,14 +54,26 @@ app.post('/incoming', async (req, res) => {
   console.log(`Received SMS on shortcode ${to} from ${from}: "${text}"`);
 
   try {
-    const prompt = `
+const prompt = `
 You are an AI specialized ONLY in agriculture.
-If the question is about agriculture, answer helpfully.
-If not, say you can only assist with agriculture topics.
+
+If the question is about agriculture (whether asked in English or Swahili), answer helpfully in the same language.
+
+If the question is NOT about agriculture, politely reply (matching the user's language):
+- English: "Sorry, I can only assist with agriculture-related topics."
+- Swahili: "Samahani, naweza kusaidia tu kwenye masuala ya kilimo."
+
+You can also help farmers by:
+- Predicting climate change impacts on crops/livestock.
+- Estimating selling costs and current market prices.
+- Giving quick diagnosis based on symptoms.
+
+Keep answers short, clear, and practical for farmers.
 
 User: ${text}
 AI:
-    `;
+`;
+
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     const result = await model.generateContent(prompt);
@@ -93,9 +105,17 @@ app.post('/api/chat', async (req, res) => {
         const userMessage = req.body.message;
         const prompt = `
 You are an AI assistant specialized ONLY in agriculture.
-If the question is about agriculture, answer helpfully.
-If asked about anything else, reply politely:
+If the user asks about agriculture, provide helpful, practical answers.
+If asked about anything unrelated to agriculture, reply politely:
 "Sorry, I can only assist with agriculture-related topics."
+
+You can also help farmers by:
+- Predicting possible climate change impacts on crops and livestock.
+- Estimating the cost of selling produce and current market trading prices.
+- Giving quick disease or pest diagnosis based on symptoms.
+
+Keep your answers short, clear, and useful for farmers.
+"
 
 User: ${userMessage}
 AI:
